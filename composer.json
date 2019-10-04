@@ -7,8 +7,7 @@
         "ignore-platform-reqs": true
     },
     "require": {
-        "php": ">=7.1.3",
-        "biurad/support": "^0.1"
+        "php": ">=7.1.3"
     },
     "license": "BSD-3-Clause",
     "authors": [
@@ -16,5 +15,8 @@
             "name": "Niiquaye Divine Ibok",
             "email": "divineibok@gmail.com"
         }
-    ]
+    ],
+    "suggest": {
+        "biurad/support": "To use array capability in PrushResolver, It's important"
+    }
 }
