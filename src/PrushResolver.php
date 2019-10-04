@@ -111,7 +111,7 @@ class PrushResolver implements Interfaces\PrushResolverInterface
      */
     public function addLocation($location)
     {
-        return $this->paths[] = $this->resolvePath($location);
+        $this->paths[] = $this->resolvePath($location);
     }
 
     /**
@@ -145,7 +145,7 @@ class PrushResolver implements Interfaces\PrushResolverInterface
             unset($this->extensions[$index]);
         }
 
-        return array_unshift($this->extensions, $extension);
+        array_unshift($this->extensions, $extension);
     }
 
     /**
@@ -153,7 +153,7 @@ class PrushResolver implements Interfaces\PrushResolverInterface
      */
     public function flush()
     {
-        return $this->founds = [];
+        $this->founds = [];
     }
 
     /**
