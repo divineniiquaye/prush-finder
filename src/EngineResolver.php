@@ -44,11 +44,17 @@ class EngineResolver
      * @param  Closure  $resolver
      * @return void
      */
-    public function register($engine, Closure $resolver)
+    public function register($engine, $resolver)
     {
         unset($this->resolved[$engine]);
 
-        $this->resolvers[$engine] = $resolver;
+        if ($resolver instanceof Closure) {
+            $this->resolvers[$engine] = $resolver;
+        } else {
+            $this->resolvers[$engine] = function () use ($resolver) {
+                return new $resolver();
+            };
+        }
     }
 
     /**
