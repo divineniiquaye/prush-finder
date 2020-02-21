@@ -23,7 +23,7 @@ interface PrushResolverInterface
      * Get the fully qualified location of the file.
      *
      * @param  string  $file
-     * 
+     *
      * @return string
      */
     public function find($file);
@@ -45,6 +45,24 @@ interface PrushResolverInterface
     public function prependLocation($location);
 
     /**
+     * Add a namespace hint to the finder.
+     *
+     * @param  string  $namespace
+     * @param  string|array  $hints
+     * @return void
+     */
+    public function addNamespace($namespace, $hints);
+
+    /**
+     * Prepend a namespace hint to the finder.
+     *
+     * @param  string  $namespace
+     * @param  string|array  $hints
+     * @return void
+     */
+    public function prependNamespace($namespace, $hints);
+
+    /**
      * Add a valid view extension to the finder.
      *
      * @param  string  $extension
@@ -52,6 +70,14 @@ interface PrushResolverInterface
      * @return void
      */
     public function addExtension($extension);
+
+    /**
+     * Returns whether or not the view name has any hint information.
+     *
+     * @param  string  $name
+     * @return bool
+     */
+    public function hasHintInformation($name);
 
     /**
      * Flush the cache of located views.

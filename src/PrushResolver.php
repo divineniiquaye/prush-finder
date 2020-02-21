@@ -17,7 +17,7 @@
 
 namespace Prush;
 
-use InvalidArgumentException;
+use BiuradPHP\Template\Interfaces\ViewInterface;
 
 class PrushResolver implements Interfaces\PrushResolverInterface
 {
@@ -43,6 +43,13 @@ class PrushResolver implements Interfaces\PrushResolverInterface
     protected $extensions = [];
 
     /**
+     * The namespace to file path hints.
+     *
+     * @var array
+     */
+    protected $hints = [];
+
+    /**
      * Create a new file view loader instance.
      *
      * @param array      $paths
@@ -66,6 +73,10 @@ class PrushResolver implements Interfaces\PrushResolverInterface
             return $this->founds[$file];
         }
 
+        if ($this->hasHintInformation($name = trim($file))) {
+            return $this->founds[$name] = $this->findNamespacedView($name);
+        }
+
         return $this->founds[$file] = $this->findInPaths($file, $this->paths);
     }
 
@@ -77,7 +88,7 @@ class PrushResolver implements Interfaces\PrushResolverInterface
      *
      * @return string
      *
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      */
     protected function findInPaths($name, $paths)
     {
@@ -89,7 +100,44 @@ class PrushResolver implements Interfaces\PrushResolverInterface
             }
         }
 
-        throw new InvalidArgumentException("File [{$name}] not found.");
+        throw new \InvalidArgumentException("File [{$name}] not found.");
+    }
+
+    /**
+     * Get the path to a template with a named path.
+     *
+     * @param  string  $name
+     * @return string
+     */
+    protected function findNamespacedView($name)
+    {
+        [$namespace, $view] = $this->parseNamespaceSegments($name);
+
+        return $this->findInPaths($view, $this->hints[$namespace]);
+    }
+
+    /**
+     * Get the segments of a template with a named path.
+     *
+     * @param  string  $name
+     * @return array
+     *
+     * @throws \InvalidArgumentException
+     */
+    protected function parseNamespaceSegments($name)
+    {
+        $segments = explode(ViewInterface::HINT_PATH_DELIMITER, $name);
+        $segments[0] = str_replace(['@', '#'], '', $segments[0]);
+
+        if (count($segments) !== 2) {
+            throw new \InvalidArgumentException("View [{$name}] has an invalid name.");
+        }
+
+        if (! isset($this->hints[$segments[0]])) {
+            throw new \InvalidArgumentException("No hint path defined for [{$segments[0]}].");
+        }
+
+        return $segments;
     }
 
     /**
@@ -120,6 +168,42 @@ class PrushResolver implements Interfaces\PrushResolverInterface
     public function prependLocation($location)
     {
         return array_unshift($this->paths, $this->resolvePath($location));
+    }
+
+    /**
+     * Add a namespace hint to the finder.
+     *
+     * @param  string  $namespace
+     * @param  string|array  $hints
+     * @return void
+     */
+    public function addNamespace($namespace, $hints)
+    {
+        $hints = (array) $hints;
+
+        if (isset($this->hints[$namespace])) {
+            $hints = array_merge($this->hints[$namespace], $hints);
+        }
+
+        $this->hints[$namespace] = $hints;
+    }
+
+    /**
+     * Prepend a namespace hint to the finder.
+     *
+     * @param  string  $namespace
+     * @param  string|array  $hints
+     * @return void
+     */
+    public function prependNamespace($namespace, $hints)
+    {
+        $hints = (array) $hints;
+
+        if (isset($this->hints[$namespace])) {
+            $hints = array_merge($hints, $this->hints[$namespace]);
+        }
+
+        $this->hints[$namespace] = $hints;
     }
 
     /**
@@ -185,9 +269,19 @@ class PrushResolver implements Interfaces\PrushResolverInterface
      *
      * @return array
      */
-    public function getfounds()
+    public function getFounds()
     {
         return $this->founds;
+    }
+
+    /**
+     * Get the namespace to file path hints.
+     *
+     * @return array
+     */
+    public function getHints()
+    {
+        return $this->hints;
     }
 
     /**
@@ -198,5 +292,16 @@ class PrushResolver implements Interfaces\PrushResolverInterface
     public function getExtensions()
     {
         return $this->extensions;
+    }
+
+    /**
+     * Returns whether or not the view name has any hint information.
+     *
+     * @param  string  $name
+     * @return bool
+     */
+    public function hasHintInformation($name)
+    {
+        return strpos($name, ViewInterface::HINT_PATH_DELIMITER) > 0;
     }
 }

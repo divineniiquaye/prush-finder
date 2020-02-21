@@ -17,8 +17,6 @@
 
 namespace Prush;
 
-use Closure;
-
 class EngineResolver
 {
     /**
@@ -41,17 +39,21 @@ class EngineResolver
      * The engine string typically corresponds to a file extension.
      *
      * @param  string   $engine
-     * @param  Closure  $resolver
+     * @param  \Closure  $resolver
      * @return void
      */
     public function register($engine, $resolver)
     {
         unset($this->resolved[$engine]);
 
-        if ($resolver instanceof Closure) {
+        if ($resolver instanceof \Closure) {
             $this->resolvers[$engine] = $resolver;
         } else {
             $this->resolvers[$engine] = function () use ($resolver) {
+                if (is_object($resolver)) {
+                    return $resolver;
+                }
+
                 return new $resolver();
             };
         }
