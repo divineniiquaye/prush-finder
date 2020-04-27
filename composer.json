@@ -1,5 +1,5 @@
 {
-    "name": "divineniiquaye/prush",
+    "name": "divineniiquaye/prush-finder",
     "description": "This is an engine system to load files in a dynamic way, implemented from laravel view.",
     "type": "library",
     "config": {

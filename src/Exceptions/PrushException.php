@@ -11,7 +11,7 @@
  * @copyright 2019 Biurad Group (https://biurad.com/)
  * @license   https://opensource.org/licenses/BSD-3-Clause License
  *
- * @link      https://www.biurad.com/projects/prush
+ * @link      https://www.biurad.com/projects/prush-finder
  * @since     Version 0.1
  */
 

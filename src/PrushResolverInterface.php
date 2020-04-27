@@ -15,7 +15,7 @@
  * @since     Version 0.1
  */
 
-namespace Prush\Interfaces;
+namespace Prush;
 
 interface PrushResolverInterface
 {
@@ -38,13 +38,6 @@ interface PrushResolverInterface
     public function addLocation($location);
 
     /**
-     * Prepend a location to the finder.
-     *
-     * @param string $location
-     */
-    public function prependLocation($location);
-
-    /**
      * Add a namespace hint to the finder.
      *
      * @param  string  $namespace
@@ -52,15 +45,6 @@ interface PrushResolverInterface
      * @return void
      */
     public function addNamespace($namespace, $hints);
-
-    /**
-     * Prepend a namespace hint to the finder.
-     *
-     * @param  string  $namespace
-     * @param  string|array  $hints
-     * @return void
-     */
-    public function prependNamespace($namespace, $hints);
 
     /**
      * Add a valid view extension to the finder.
@@ -78,6 +62,13 @@ interface PrushResolverInterface
      * @return bool
      */
     public function hasHintInformation($name);
+
+    /**
+     * Get registered extensions.
+     *
+     * @return array
+     */
+    public function getExtensions();
 
     /**
      * Flush the cache of located views.

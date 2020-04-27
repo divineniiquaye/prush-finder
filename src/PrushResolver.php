@@ -11,15 +11,13 @@
  * @copyright 2019 Biurad Group (https://biurad.com/)
  * @license   https://opensource.org/licenses/BSD-3-Clause License
  *
- * @link      https://www.biurad.com/projects/prush
+ * @link      https://www.biurad.com/projects/prush-finder
  * @since     Version 0.1
  */
 
 namespace Prush;
 
-use BiuradPHP\Template\Interfaces\ViewInterface;
-
-class PrushResolver implements Interfaces\PrushResolverInterface
+class PrushResolver implements PrushResolverInterface
 {
     /**
      * The array of active view paths.
@@ -50,14 +48,22 @@ class PrushResolver implements Interfaces\PrushResolverInterface
     protected $hints = [];
 
     /**
+     * The namespace to file path delimiter.
+     *
+     * @var array
+     */
+    protected $namespaceDelimiter;
+
+    /**
      * Create a new file view loader instance.
      *
      * @param array      $paths
      * @param array|null $extensions
      */
-    public function __construct(array $paths, array $extensions = null)
+    public function __construct(array $paths, array $extensions = null, string $namespaceSeperator = '::')
     {
         $this->paths = array_map([$this, 'resolvePath'], $paths);
+        $this->namespaceDelimiter = $namespaceSeperator;
 
         if (isset($extensions)) {
             $this->extensions = $extensions;
@@ -126,7 +132,7 @@ class PrushResolver implements Interfaces\PrushResolverInterface
      */
     protected function parseNamespaceSegments($name)
     {
-        $segments = explode(ViewInterface::HINT_PATH_DELIMITER, $name);
+        $segments = explode($this->namespaceDelimiter, $name);
         $segments[0] = str_replace(['@', '#'], '', $segments[0]);
 
         if (count($segments) !== 2) {
@@ -150,7 +156,10 @@ class PrushResolver implements Interfaces\PrushResolverInterface
     protected function getPossibleFiles($name)
     {
         return array_map(function ($extension) use ($name) {
-            return str_replace('.', '/', $name).'.'.$extension;
+            //Cutting extra symbols (see Twig)
+            return preg_replace(
+                '#/{2,}#', '/', str_replace(['\\', '.'], '/', (string) $name)
+            ) . '.' . $extension;
         }, $this->extensions);
     }
 
@@ -160,14 +169,6 @@ class PrushResolver implements Interfaces\PrushResolverInterface
     public function addLocation($location)
     {
         $this->paths[] = $this->resolvePath($location);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function prependLocation($location)
-    {
-        return array_unshift($this->paths, $this->resolvePath($location));
     }
 
     /**
@@ -189,24 +190,6 @@ class PrushResolver implements Interfaces\PrushResolverInterface
     }
 
     /**
-     * Prepend a namespace hint to the finder.
-     *
-     * @param  string  $namespace
-     * @param  string|array  $hints
-     * @return void
-     */
-    public function prependNamespace($namespace, $hints)
-    {
-        $hints = (array) $hints;
-
-        if (isset($this->hints[$namespace])) {
-            $hints = array_merge($hints, $this->hints[$namespace]);
-        }
-
-        $this->hints[$namespace] = $hints;
-    }
-
-    /**
      * Resolve the path.
      *
      * @param string $path
@@ -215,7 +198,7 @@ class PrushResolver implements Interfaces\PrushResolverInterface
      */
     protected function resolvePath($path)
     {
-        return realpath($path) ?: $path;
+        return (new \SplFileInfo($path))->getPathname();
     }
 
     /**
@@ -302,6 +285,6 @@ class PrushResolver implements Interfaces\PrushResolverInterface
      */
     public function hasHintInformation($name)
     {
-        return strpos($name, ViewInterface::HINT_PATH_DELIMITER) > 0;
+        return strpos($name, $this->namespaceDelimiter) > 0;
     }
 }
